@@ -1,5 +1,5 @@
-import axios from "axios";
 import { Move, PokeAPIResponse } from "../interfaces/poke-api.interface";
+import { PokeApiAdapter } from "../api/pokeApi.adapter";
 export class Pokemon {
   /* this points to the class instance */
   get imageUrl(): string {
@@ -7,7 +7,17 @@ export class Pokemon {
   }
 
   /* short way of class */
-  constructor(public readonly id: number, public name: string) {}
+  constructor(
+    public readonly id: number,
+    public name: string,
+    private http: PokeApiAdapter
+  ) {}
+
+  /* INJECTION DEPENDENCIES */
+  // is add a dependency to the class to avoid  the class to be coupled to the class
+  //for the class shouldn't have all functionality
+  //our class should depend on the outside world, like axios for example
+  //later if we want to change axios for another library we can do it without change the class
 
   /* methods are functions inside of the class, has access to the properties */
   sayMyName(): void {
@@ -22,7 +32,7 @@ export class Pokemon {
   //with private we can't access to the method from outside the class
 
   async getMoves(): Promise<Move[]> {
-    const { data } = await axios.get<PokeAPIResponse>(
+    const data = await this.http.get(
       `https://pokeapi.co/api/v2/pokemon/${this.id}`
     );
     console.log(data.moves);
@@ -30,6 +40,7 @@ export class Pokemon {
   }
 }
 
-export const charmander = new Pokemon(4, "charmander");
+const http = new PokeApiAdapter();
+export const charmander = new Pokemon(4, "charmander", http);
 
 charmander.getMoves();
