@@ -1,5 +1,9 @@
 import { Move, PokeAPIResponse } from "../interfaces/poke-api.interface";
-import { PokeApiAdapter } from "../api/pokeApi.adapter";
+import {
+  PokeApiAdapter,
+  PokeApiFetchAdapter,
+  HttAdapter,
+} from "../api/pokeApi.adapter";
 export class Pokemon {
   /* this points to the class instance */
   get imageUrl(): string {
@@ -10,7 +14,7 @@ export class Pokemon {
   constructor(
     public readonly id: number,
     public name: string,
-    private http: PokeApiAdapter
+    private http: HttAdapter
   ) {}
 
   /* INJECTION DEPENDENCIES */
@@ -32,7 +36,7 @@ export class Pokemon {
   //with private we can't access to the method from outside the class
 
   async getMoves(): Promise<Move[]> {
-    const data = await this.http.get(
+    const data = await this.http.get<PokeAPIResponse>(
       `https://pokeapi.co/api/v2/pokemon/${this.id}`
     );
     console.log(data.moves);
@@ -40,7 +44,8 @@ export class Pokemon {
   }
 }
 
-const http = new PokeApiAdapter();
-export const charmander = new Pokemon(4, "charmander", http);
+const axiosHttp = new PokeApiAdapter();
+const fetchHttp = new PokeApiFetchAdapter();
+export const charmander = new Pokemon(4, "charmander", axiosHttp);
 
 charmander.getMoves();
